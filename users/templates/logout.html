@@ -1,0 +1,30 @@
+{% extends "mainpage.html" %}
+
+{% block content %}
+<style>
+    form{
+        color: #fff;
+    }
+    .row{
+        padding-top: 200px!important;
+        color: #fff;
+    }
+</style>
+<div class="container">
+    <div class="row">
+        <div class="col-md-3">
+        </div>
+        <div class=" col-sm-12 col-md-5 col-md-offset-6 ">
+            <div class="content-section">
+            <h2>YOU HAVE BEEN LOGOUT</h2> 
+            <div class="border-top pt-3 text-center">
+                <small class="text-center">
+                    <a class="btn btn-primary" href="{% url 'login' %}">Log in again</a>
+                    <a class="btn btn-light" href="{% url 'mainpage' %}">Home Page</a>
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock content %}

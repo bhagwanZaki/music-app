@@ -1,0 +1,283 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block content %}
+<style>
+  
+</style>
+<div class="row">
+    <div class="col-md-6">
+        <div class="row ">
+            <div class="col-md-9 col-5">
+                <h1>Floran Music</h1>
+            </div>
+            <div class="col-md-3 col-7">
+                {{user.username}}
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"></button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                      <li><a class="dropdown-item" href="{% url 'update_profile' %}">Update Profile</a></li>
+                      <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+                    </ul>
+                  </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+               
+                <tbody class="table-dark">
+                    {% for song in songs %}
+                    <tr onclick=playsong({{forloop.counter}}) id={{forloop.counter}}>
+                        <td>
+                            {{song.music|cut:'music/'}}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-md-6 controller" style="position: fixed; right: 0;">
+        <div class="row" id="main">
+            <div class="col-12">
+                <img class="thubnail-img" src="{% static 'pic/default-music.png' %}">
+            </div>
+            <div class="col-12">
+                <progress id="progress" value="0" max="100"></progress>
+            </div>
+            <div class="col-12">
+                <div class="row">
+                    <div class="col-2" id="current">0:00</div>
+                    <div class="col-md-9 col-8"></div>
+                    <div class="col-1" id="duration">0:00</div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-2 music-container">
+                    <div class="img-container">
+                        <img src="{% static 'pic/default-music.png' %}" 
+                        alt="music-cover" id="cover" />
+                      </div>
+                </div>
+                <div class="col-9 text-center">
+                    <button id="prev">
+                        <i class="fas fa-backward"></i>
+                      </button>
+                      <button id="play">
+                        <i class="fas fa-play"></i>
+                      </button>
+                      <button id="next">
+                        <i class="fas fa-forward"></i>
+                      </button>
+                </div>
+                <div class="col-1">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                        <i class="fa fa-plus"></i>
+                      </button>
+                </div>
+            </div>
+        </div>
+        <audio id="audio" ></audio>
+    </div>
+</div>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="color: #000;">
+      <div class="modal-content">
+        <form action="{% url 'music_create' %}" method="POST" enctype="multipart/form-data">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Add Music</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+              {% csrf_token %}
+
+              {% for field in form %}
+                  <div class="form-group">
+                    {{field.label_tag}}
+                    {{ field|add_class:"form-control" }}
+                    {{field.help_text}}
+                    {{field.errors}}
+                  </div>
+              {% endfor %}
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+{{ music|json_script:"music" }} 
+{{ pics|json_script:"pics" }} 
+
+
+<script>
+    document.getElementById('id_Class-music').accept = 'audio/*'
+
+    var musicList = JSON.parse(document.getElementById("music").textContent);
+    var pics = JSON.parse(document.getElementById("pics").textContent);
+    console.log(musicList)
+    console.log(pics)
+    var audio = document.getElementById('audio');
+    var musicContainer = document.getElementById('main');
+    var playBtn = document.getElementById('play');
+    const prevBtn = document.getElementById('prev');
+    const nextBtn = document.getElementById('next');
+    var progress = document.getElementById('progress');
+    var img = document.querySelector('.thubnail-img')
+
+    var cd = document.querySelector('.music-container')
+    var songIndex = 0
+
+    function loadmusic(songIndex){
+        console.log(songIndex,musicList)
+        audio.src = musicList[songIndex];
+        img.src = pics[songIndex]
+    };
+   
+    loadmusic(songIndex)
+   
+    function playmusic(){
+        console.log('play music')
+        musicContainer.classList.add('play');
+        playBtn.querySelector('i.fas').classList.remove('fa-play');
+        playBtn.querySelector('i.fas').classList.add('fa-pause');
+        cd.classList.add('play')
+        audio.play();
+    }
+   
+    function pausemusic(){
+        musicContainer.classList.remove('play');
+        playBtn.querySelector('i.fas').classList.remove('fa-pause');
+        playBtn.querySelector('i.fas').classList.add('fa-play');
+        cd.classList.remove('play')
+        audio.pause();
+    }
+   
+    function playsong(id){
+        console.log(songIndex)
+        if(id-1 !== songIndex){
+            console.log('cleaning')
+            if(document.getElementById(songIndex=== 0?1:songIndex+1).classList.contains('playing')){
+                document.getElementById(songIndex === 0?1:songIndex+1).classList.remove('playing')
+            }
+            if(document.getElementById(songIndex === 0?1:songIndex+1).classList.contains('paused')){
+                document.getElementById(songIndex === 0?1:songIndex+1).classList.remove('paused')
+            }
+        }
+
+        if(document.getElementById(id).classList.contains('playing')){
+            console.log('in first if')
+            document.getElementById(id).classList.remove('playing')
+            document.getElementById(id).classList.add('paused')
+            pausemusic()
+        } else {
+            console.log('in sec if')
+            songIndex = id-1
+            
+            if(document.getElementById(id).classList.contains('paused')){
+                playmusic()
+                document.getElementById(id).classList.remove('paused')
+                document.getElementById(id).classList.add('playing')
+            } else {
+                loadmusic(songIndex);
+                
+                playmusic(); 
+                document.getElementById(id).classList.add('playing')
+            }
+        }
+            
+            
+    }
+    function prevSong() {
+        try{
+
+            if(document.getElementById(songIndex === 0?1:songIndex+1).classList.contains('playing')){
+                document.getElementById(songIndex === 0?1:songIndex+1).classList.remove('playing')
+            }
+            if(document.getElementById(songIndex === 0?1:songIndex+1).classList.contains('paused')){
+                document.getElementById(songIndex === 0?1:songIndex+1).classList.remove('paused')
+            }
+        } catch(err) {
+
+        }
+        songIndex--;
+        document.getElementById(songIndex+1).classList.add('playing')
+
+        if (songIndex < 0) {
+            songIndex = musicList.length - 1;
+        }
+
+        loadmusic(songIndex);
+
+        playmusic();
+    }
+
+    // Next song
+    function nextSong() {
+        try{
+
+        if(document.getElementById(songIndex === 0?1:songIndex+1).classList.contains('playing')){
+            document.getElementById(songIndex === 0?1:songIndex+1).classList.remove('playing')
+        }
+        if(document.getElementById(songIndex === 0?1:songIndex+1).classList.contains('paused')){
+            document.getElementById(songIndex === 0?1:songIndex+1).classList.remove('paused')
+        }
+        } catch(err) {
+
+        }
+        songIndex++;
+        document.getElementById(songIndex === 0?1:songIndex+1).classList.add('playing')
+
+        if (songIndex > musicList.length - 1) {
+            songIndex = 0;
+        }
+
+        loadmusic(songIndex);
+
+        playmusic();
+    }
+
+    function convert_duration_to_time(s){
+        return (s-(s%=60))/60+(9<s?':':':0')+s
+    }
+    function updateProgress(e) {
+        const { duration, currentTime } = e.srcElement;
+        const progressPercent = (currentTime / duration) * 100;
+        progress.value = progressPercent;
+        document.getElementById('current').innerHTML = convert_duration_to_time( Math. floor(currentTime))
+        document.getElementById('duration').innerHTML = convert_duration_to_time( Math. floor(duration))
+    }
+
+    function setprogress(e){
+        console.log('progreas')
+        width = this.clientWidth
+        clickX = e.offsetX
+        duration = audio.duration
+        console.log(duration)
+        console.log((clickX/ width) * duration)
+        audio.currentTime = (clickX/ width) * duration
+        console.log(audio.currentTime)
+        console.log(clickX)
+    }
+
+
+
+    audio.addEventListener('timeupdate', updateProgress);
+    audio.addEventListener('ended',nextSong)
+    prevBtn.addEventListener('click', prevSong);
+    nextBtn.addEventListener('click', nextSong);
+    progress.addEventListener('click',setprogress)
+    playBtn.addEventListener('click',()=>{
+        const isPlaying = musicContainer.classList.contains('play');
+
+        if (isPlaying) {
+            pausemusic();
+        } else {
+            playmusic();
+        }
+    });
+</script>
+{% endblock content %}

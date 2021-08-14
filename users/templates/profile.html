@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<style>
+  .profile{
+    padding: 200px!important;
+  }
+  @media (max-width: 770px) {
+    .profile{
+      padding: 20px!important;
+    }
+    
+  }
+</style>
+<div class="container-fluid">
+  <div class="row">
+    <h1>
+    <a href="{% url 'music_list' %}" style="color: #fff; text-decoration: none;">
+        Floran Music
+      </a>
+    </h1>
+  </div>
+    <div class="row text-center profile">
+      <div class="col-md-6">
+        <div class="row">
+          <div class="col-md-12 text-start" >
+            <div class="media-body">
+              <h3 class="account-heading">Username : {{ user.username }}</h3>
+              <h4 class="account-heading">email: {{ user.email }}</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+      <hr>
+      <div class="col-md-6" >
+        <div class="row">
+          <div class="col-12">
+    
+            <form method="POST" enctype="multipart/form-data">
+              {% csrf_token %}
+              <fieldset class="form-group">
+                <legend class="border-bottom mb-4"> Update Profile Info </legend>
+                <div class="row">
+                  <div class="col-md-12">
+                    {{ u_form|crispy }}
+                  </div>
+                </div>
+              </fieldset>
+              <br>
+              <div class="row">
+                
+                <!-- <div class="form-group"> -->
+                  <div class="col-12">
+                    <button class="btn btn-outline-info" type="submit">Update</button>
+                     <br> <a href="{% url 'password_reset' %}" style="color: #fff;">Change Password</a>
+                  </div>
+                  <!-- </div> -->
+                </div>
+              </form>
+            </div>
+          </div>
+      </div>
+    </div>
+    
+     
+  
+</div>
+
+{% endblock content %}
